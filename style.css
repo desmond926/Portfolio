@@ -186,3 +186,44 @@ nav ul {
 .section-title {
     font-size: 2rem;
     }
+
+/* --- Carte unique pour la veille technologique --- */
+
+#rss-container {
+    max-height: 400px; /* hauteur fixe */
+    overflow-y: auto;  /* scroll interne */
+    padding-right: 10px;
+}
+
+/* Style de la carte unique */
+#rss-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#rss-container li {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#rss-container li:last-child {
+    border-bottom: none;
+}
+
+#rss-container a {
+    color: #2c3e50;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+#rss-container a:hover {
+    color: #3498db;
+}
+
+#rss-container small {
+    color: #666;
+    display: block;
+    margin-top: 3px;
+    font-size: 0.85rem;
+}
