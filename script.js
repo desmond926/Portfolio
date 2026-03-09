@@ -11,24 +11,31 @@ document.querySelector('form').addEventListener('submit', function(e) {
     alert('Formulaire soumis ! (Fonctionnalité à configurer)');
     });
     
-const RSS_URL = "https://ubuntu.com/security/notices/rss";
-const API = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(RSS_URL);
+// URL du flux RSS Ubuntu Security Notices
+const rssUrl = "https://ubuntu.com/security/notices/rss";
 
-fetch(API)
+// Proxy pour contourner le CORS
+const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
+
+fetch(proxy)
   .then(response => response.json())
   .then(data => {
-    if (!data.items) {
-      document.getElementById("rss-container").innerHTML = "Impossible de lire le flux.";
-      return;
-    }
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(data.contents, "text/xml");
+    const items = xml.querySelectorAll("item");
 
     let html = "<h2>Ubuntu Security Notices</h2><ul>";
 
-    data.items.slice(0, 10).forEach(item => {
+    items.forEach((item, index) => {
+      if (index >= 10) return; // Limite à 10 entrées
+      const title = item.querySelector("title").textContent;
+      const link = item.querySelector("link").textContent;
+      const date = item.querySelector("pubDate").textContent;
+
       html += `
         <li>
-          <a href="${item.link}" target="_blank">${item.title}</a><br>
-          <small>${item.pubDate}</small>
+          <a href="${link}" target="_blank">${title}</a><br>
+          <small>${date}</small>
         </li>
       `;
     });
@@ -37,7 +44,6 @@ fetch(API)
     document.getElementById("rss-container").innerHTML = html;
   })
   .catch(error => {
+    document.getElementById("rss-container").innerHTML = "Erreur lors du chargement du flux RSS.";
     console.error(error);
-    document.getElementById("rss-container").innerHTML =
-      "Erreur lors du chargement du flux RSS.";
   });
