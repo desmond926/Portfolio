@@ -11,39 +11,55 @@ document.querySelector('form').addEventListener('submit', function(e) {
     alert('Formulaire soumis ! (Fonctionnalité à configurer)');
     });
     
-// URL du flux RSS Ubuntu Security Notices
-const rssUrl = "https://ubuntu.com/security/notices/rss";
+document.addEventListener("DOMContentLoaded", () => {
+  const RSS_URL = "https://www.linuxtoday.com/feed/";
+  const API = "https://api.allorigins.win/raw?url=" + encodeURIComponent(RSS_URL);
 
-// Proxy pour contourner le CORS
-const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
+  fetch(API)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Erreur réseau");
+      }
+      return response.text();
+    })
+    .then(str => {
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(str, "text/xml");
+      const items = xml.querySelectorAll("item");
 
-fetch(proxy)
-  .then(response => response.json())
-  .then(data => {
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(data.contents, "text/xml");
-    const items = xml.querySelectorAll("item");
+      const container = document.getElementById("rss-container");
+      if (!container) return;
 
-    let html = "<h2>Ubuntu Security Notices</h2><ul>";
+      if (!items.length) {
+        container.innerHTML = "Impossible de lire le flux.";
+        return;
+      }
 
-    items.forEach((item, index) => {
-      if (index >= 10) return; // Limite à 10 entrées
-      const title = item.querySelector("title").textContent;
-      const link = item.querySelector("link").textContent;
-      const date = item.querySelector("pubDate").textContent;
+      let html = "<h2>Linux Today – Derniers articles</h2><ul>";
 
-      html += `
-        <li>
-          <a href="${link}" target="_blank">${title}</a><br>
-          <small>${date}</small>
-        </li>
-      `;
+      items.forEach((item, index) => {
+        if (index >= 10) return;
+
+        const title = item.querySelector("title")?.textContent || "Sans titre";
+        const link = item.querySelector("link")?.textContent || "#";
+        const date = item.querySelector("pubDate")?.textContent || "";
+
+        html += `
+          <li>
+            <a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a><br>
+            <small>${date}</small>
+          </li>
+        `;
+      });
+
+      html += "</ul>";
+      container.innerHTML = html;
+    })
+    .catch(error => {
+      console.error(error);
+      const container = document.getElementById("rss-container");
+      if (container) {
+        container.innerHTML = "Erreur lors du chargement du flux RSS.";
+      }
     });
-
-    html += "</ul>";
-    document.getElementById("rss-container").innerHTML = html;
-  })
-  .catch(error => {
-    document.getElementById("rss-container").innerHTML = "Erreur lors du chargement du flux RSS.";
-    console.error(error);
-  });
+});
