@@ -7,7 +7,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         });
 
 document.querySelector('form').addEventListener('submit', function() {
-    alert('Formulaire soumis ! (Fonctionnalité à configurer)');
+    alert('Formulaire soumis !');
     });
     
 document.addEventListener("DOMContentLoaded", () => {
